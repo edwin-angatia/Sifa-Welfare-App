@@ -1,0 +1,213 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "Registered welfare program member profile, dependants, next of kin, and credentials",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID or unique member identifier"
+        },
+        "idNumber": {
+          "type": "string",
+          "description": "National ID or Government identity number"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Full legal name of the member"
+        },
+        "memberNumber": {
+          "type": "string",
+          "description": "Unique assigned welfare membership identifier (e.g., WF-2026-0042)"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Primary phone number used for login and recovery"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Optional contact email address"
+        },
+        "passwordHash": {
+          "type": "string",
+          "description": "Cryptographic salted SHA-256 hash for member login"
+        },
+        "passwordSalt": {
+          "type": "string",
+          "description": "Salt used for password hash computation"
+        },
+        "dependants": {
+          "type": "array",
+          "description": "Registered family dependants",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "relationship": { "type": "string" },
+              "age": { "type": "integer" },
+              "specialNeeds": { "type": "string" }
+            }
+          }
+        },
+        "nextOfKin": {
+          "type": "object",
+          "description": "Primary emergency contact and next of kin",
+          "properties": {
+            "name": { "type": "string" },
+            "relationship": { "type": "string" },
+            "phone": { "type": "string" },
+            "address": { "type": "string" }
+          }
+        },
+        "category": {
+          "type": "string",
+          "description": "Welfare assistance category",
+          "enum": ["Senior Citizen", "Low Income Family", "Disability Assistance", "Healthcare Relief", "Education Aid", "General Member"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Membership standing",
+          "enum": ["Active", "Pending Verification", "On Hold", "Archived"]
+        },
+        "householdSize": {
+          "type": "integer",
+          "description": "Number of dependents in the household"
+        },
+        "monthlyIncome": {
+          "type": "number",
+          "description": "Reported monthly household income"
+        },
+        "address": {
+          "type": "string",
+          "description": "Residential address"
+        },
+        "emergencyContact": {
+          "type": "string",
+          "description": "Name and phone number of emergency contact"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Case worker or member notes"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of record creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update"
+        }
+      },
+      "required": ["userId", "fullName", "memberNumber", "category", "status", "createdAt"]
+    },
+    "WelfareCase": {
+      "title": "WelfareCase",
+      "description": "Welfare support application and case milestone history",
+      "type": "object",
+      "properties": {
+        "memberId": {
+          "type": "string",
+          "description": "Associated member document ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID or Member identifier of the applicant"
+        },
+        "caseNumber": {
+          "type": "string",
+          "description": "Human-readable case tracking code (e.g., CASE-8821)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Case title / subject of relief"
+        },
+        "category": {
+          "type": "string",
+          "description": "Type of aid requested",
+          "enum": ["Financial Aid", "Medical Assistance", "Food Support", "Housing Subsidy", "Education Grant", "Counseling"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Current processing state of the case",
+          "enum": ["Submitted", "Under Review", "Approved", "Disbursed", "Closed", "Rejected"]
+        },
+        "priority": {
+          "type": "string",
+          "description": "Urgency classification",
+          "enum": ["Normal", "Urgent", "Critical"]
+        },
+        "requestedAmount": {
+          "type": "number",
+          "description": "Financial aid amount requested in local currency"
+        },
+        "approvedAmount": {
+          "type": "number",
+          "description": "Financial aid amount approved by welfare committee"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed explanation of hardship and required aid"
+        },
+        "officerNotes": {
+          "type": "string",
+          "description": "Internal assessment notes by welfare officer or administrator"
+        },
+        "disbursementDate": {
+          "type": "string",
+          "description": "Date or target milestone when assistance was disbursed"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when case was submitted"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when case was last modified"
+        }
+      },
+      "required": ["memberId", "userId", "caseNumber", "title", "category", "status", "priority", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Privileged administrator authorized to manage all members and case histories",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Admin email address"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role classification e.g. superadmin or case_officer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of role provision"
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Registered welfare community members and their profile records"
+    },
+    "/cases/{caseId}": {
+      "schema": { "$ref": "#/entities/WelfareCase" },
+      "description": "Welfare assistance claims and individual case history records"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Authorized administrators with full database overview access"
+    }
+  }
+}

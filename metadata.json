@@ -1,0 +1,6 @@
+{
+  "name": "Sifa Welfare",
+  "description": "Sifa Welfare - Star Initiative for Social and Economic Assistance. Member profiles, case history, monthly Ksh 100 contributions, and export reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

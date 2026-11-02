@@ -1,0 +1,112 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'eangatia@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidMember(data) {
+      return data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+             data.memberNumber is string && data.memberNumber.size() >= 3 && data.memberNumber.size() <= 32 &&
+             (!('idNumber' in data) || data.idNumber == null || (data.idNumber is string && data.idNumber.size() <= 64)) &&
+             (!('email' in data) || data.email == null || (data.email is string && data.email.size() <= 120)) &&
+             (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+             (!('passwordHash' in data) || (data.passwordHash is string && data.passwordHash.size() <= 128)) &&
+             (!('passwordSalt' in data) || (data.passwordSalt is string && data.passwordSalt.size() <= 64)) &&
+             (!('dependants' in data) || data.dependants is list) &&
+             (!('nextOfKin' in data) || data.nextOfKin is map) &&
+             data.category in ['Senior Citizen', 'Low Income Family', 'Disability Assistance', 'Healthcare Relief', 'Education Aid', 'General Member'] &&
+             data.status in ['Active', 'Pending Verification', 'On Hold', 'Archived'] &&
+             (!('householdSize' in data) || data.householdSize is int || data.householdSize is number) &&
+             (!('monthlyIncome' in data) || data.monthlyIncome is number || data.monthlyIncome is int) &&
+             (!('address' in data) || data.address == null || (data.address is string && data.address.size() <= 250)) &&
+             (!('emergencyContact' in data) || data.emergencyContact == null || (data.emergencyContact is string && data.emergencyContact.size() <= 150)) &&
+             (!('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 1000)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             (!('updatedAt' in data) || (data.updatedAt is timestamp && data.updatedAt <= request.time));
+    }
+
+    function isValidCase(data) {
+      return data.memberId is string && data.memberId.size() > 0 && data.memberId.size() <= 128 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.caseNumber is string && data.caseNumber.size() >= 3 && data.caseNumber.size() <= 32 &&
+             data.title is string && data.title.size() >= 3 && data.title.size() <= 120 &&
+             data.category in ['Financial Aid', 'Medical Assistance', 'Food Support', 'Housing Subsidy', 'Education Grant', 'Counseling'] &&
+             data.status in ['Submitted', 'Under Review', 'Approved', 'Disbursed', 'Closed', 'Rejected'] &&
+             data.priority in ['Normal', 'Urgent', 'Critical'] &&
+             (!('requestedAmount' in data) || data.requestedAmount is number || data.requestedAmount is int) &&
+             (!('approvedAmount' in data) || data.approvedAmount is number || data.approvedAmount is int) &&
+             (!('description' in data) || data.description == null || (data.description is string && data.description.size() <= 2000)) &&
+             (!('officerNotes' in data) || data.officerNotes == null || (data.officerNotes is string && data.officerNotes.size() <= 2000)) &&
+             (!('disbursementDate' in data) || data.disbursementDate == null || (data.disbursementDate is string && data.disbursementDate.size() <= 64)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             (!('updatedAt' in data) || (data.updatedAt is timestamp && data.updatedAt <= request.time));
+    }
+
+    match /members/{memberId} {
+      allow get: if isSignedIn() && isValidId(memberId) && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() && isValidId(memberId) &&
+                       (incoming().userId == request.auth.uid || isAdmin()) &&
+                       isValidMember(incoming());
+
+      allow update: if isSignedIn() && isValidId(memberId) &&
+                       (existing().userId == request.auth.uid || isAdmin()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidMember(incoming());
+
+      allow delete: if isSignedIn() && isValidId(memberId) && isAdmin();
+    }
+
+    match /cases/{caseId} {
+      allow get: if isSignedIn() && isValidId(caseId) && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() && isValidId(caseId) &&
+                       (incoming().userId == request.auth.uid || isAdmin()) &&
+                       isValidCase(incoming());
+
+      allow update: if isSignedIn() && isValidId(caseId) &&
+                       (existing().userId == request.auth.uid || isAdmin()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidCase(incoming());
+
+      allow delete: if isSignedIn() && isValidId(caseId) && isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list, create, update, delete: if isAdmin();
+    }
+  }
+}
