@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -186,9 +187,11 @@ fun RegistrationScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            WelfareBlue,
-                            Color(0xFF0A2E6B),
-                            Color(0xFF061A3B)
+                            Color(0xFF0288D1),
+                            Color(0xFF03A9F4),
+                            Color(0xFF81D4FA),
+                            Color(0xFFE1F5FE),
+                            Color(0xFFF8FBFE)
                         )
                     )
                 )
@@ -308,9 +311,10 @@ fun RegistrationScreen(
                     label = "RegistrationStepTransition"
                 ) { currentStep ->
                     Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        shape = RoundedCornerShape(26.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                        border = BorderStroke(1.5.dp, Color(0xFF81D4FA).copy(alpha = 0.6f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("registration_card_step_$currentStep")

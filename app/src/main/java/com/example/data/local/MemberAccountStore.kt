@@ -174,6 +174,27 @@ class MemberAccountStore(context: Context) {
         return Result.success(updated)
     }
 
+    fun toggleMonthlyContribution(memberId: String, month: Int): Result<Member> {
+        val members = getAllMembers().toMutableList()
+        val index = members.indexOfFirst { it.id == memberId }
+        if (index == -1) return Result.failure(IllegalArgumentException("Member not found"))
+
+        val member = members[index]
+        val currentPaid = member.paidMonths.toMutableSet()
+        if (currentPaid.contains(month)) {
+            currentPaid.remove(month)
+        } else {
+            currentPaid.add(month)
+        }
+        val updated = member.copy(paidMonths = currentPaid.sorted())
+        members[index] = updated
+        saveMemberList(members)
+        if (getActiveMember()?.id == memberId) {
+            setActiveMember(updated)
+        }
+        return Result.success(updated)
+    }
+
     fun resetPassword(identifierPhoneOrId: String, newPassword: String): Result<Unit> {
         val clean = identifierPhoneOrId.trim()
         val members = getAllMembers().toMutableList()
@@ -404,8 +425,8 @@ class MemberAccountStore(context: Context) {
 
     fun verifyAdminPin(enteredPin: String): Boolean {
         val clean = enteredPin.trim()
-        val currentPin = getAdminPin()
-        return clean == currentPin || clean == "9922" || clean == "1234"
+        val currentPin = getAdminPin().trim()
+        return clean.isNotBlank() && clean == currentPin
     }
 
     // PDF Constitution and Bylaws Document Metadata

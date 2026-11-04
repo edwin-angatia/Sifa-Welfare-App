@@ -477,7 +477,7 @@ fun ChangeAdminPinDialog(
         text = {
             Column {
                 Text(
-                    text = "Update your welfare administrator master PIN from default to your preferred secret passcode.",
+                    text = "Update your confidential welfare administrator master PIN to your preferred secret passcode.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -491,7 +491,7 @@ fun ChangeAdminPinDialog(
                         errorMessage = null
                     },
                     label = { Text("Current PIN *") },
-                    placeholder = { Text("Default: 9922") },
+                    placeholder = { Text("Enter current PIN") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     singleLine = true,

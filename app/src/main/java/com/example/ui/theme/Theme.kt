@@ -38,30 +38,21 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = SifaLightSurfaceVariant,
     onSecondaryContainer = Color(0xFF001E36),
     tertiary = SifaWarmOrange,
-    background = SifaLightBackground,
-    surface = SifaLightSurface,
-    surfaceVariant = SifaLightSurfaceVariant,
+    background = Color(0xFFF1F8FE),
+    surface = Color.White,
+    surfaceVariant = Color(0xFFE1F5FE),
     onBackground = Color(0xFF0F172A),
     onSurface = Color(0xFF0F172A)
 )
 
 @Composable
 fun WelfareTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = false,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content
     )

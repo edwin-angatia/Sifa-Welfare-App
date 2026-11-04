@@ -213,6 +213,38 @@ class WelfareViewModel(
         }
     }
 
+    fun toggleMonthlyContribution(month: Int, onSuccess: () -> Unit = {}) {
+        val memberId = currentMember.value?.id ?: currentUserId
+        if (memberId.isBlank()) return
+        viewModelScope.launch {
+            _isProcessing.value = true
+            val result = repository.toggleMonthlyContribution(memberId, month)
+            _isProcessing.value = false
+            if (result.isSuccess) {
+                val isNowPaid = result.getOrNull()?.paidMonths?.contains(month) == true
+                _uiMessage.value = if (isNowPaid) "Month $month verified as paid (Ksh 100)" else "Month $month marked as unpaid"
+                onSuccess()
+            } else {
+                _uiMessage.value = "Failed to update contribution: ${result.exceptionOrNull()?.localizedMessage}"
+            }
+        }
+    }
+
+    fun toggleMemberContribution(memberId: String, month: Int, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            _isProcessing.value = true
+            val result = repository.toggleMonthlyContribution(memberId, month)
+            _isProcessing.value = false
+            if (result.isSuccess) {
+                val isNowPaid = result.getOrNull()?.paidMonths?.contains(month) == true
+                _uiMessage.value = if (isNowPaid) "Contribution marked paid (Ksh 100)" else "Contribution marked unpaid"
+                onSuccess()
+            } else {
+                _uiMessage.value = "Failed to update contribution: ${result.exceptionOrNull()?.localizedMessage}"
+            }
+        }
+    }
+
     fun setAdminSession(active: Boolean) {
         repository.setAdminSession(active)
     }

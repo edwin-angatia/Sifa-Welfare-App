@@ -600,9 +600,10 @@ fun CasesScreen(
             val totalPaidAmount = paidCount * (currentMember?.contributionRateKsh ?: 100)
 
             Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.55f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -639,6 +640,32 @@ fun CasesScreen(
                                     text = "Ksh 100 / month • Jan to Dec",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+
+                        // Security Badge: Admin Editing Only
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isAdmin) Color(0xFFE0F2FE) else Color(0xFFF1F8FE),
+                            border = BorderStroke(1.dp, if (isAdmin) WelfareBlue.copy(alpha = 0.4f) else Color(0xFFB3E5FC))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (isAdmin) Icons.Default.AdminPanelSettings else Icons.Default.Lock,
+                                    contentDescription = null,
+                                    tint = if (isAdmin) WelfareBlue else Color(0xFF0288D1),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (isAdmin) "Admin Editable" else "Admin Verified",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isAdmin) WelfareBlue else Color(0xFF0288D1)
                                 )
                             }
                         }
@@ -827,26 +854,26 @@ fun CasesScreen(
 
     if (showMpesaDialogForMonth != null) {
         val monthIdx = showMpesaDialogForMonth!!
-        MpesaPaymentDialog(
+        val isPaid = (currentMember?.paidMonths ?: emptyList()).contains(monthIdx)
+        MemberMonthContributionInfoDialog(
             monthIndex = monthIdx,
             monthName = ContributionHelper.getMonthName(monthIdx),
+            isPaid = isPaid,
             member = currentMember,
-            onDismiss = { showMpesaDialogForMonth = null },
-            onConfirmMpesaPayment = {
-                onRecordContribution(monthIdx)
-                showMpesaDialogForMonth = null
-            }
+            onDismiss = { showMpesaDialogForMonth = null }
         )
     }
 
     if (showAdminConfirmDialogForMonth != null) {
         val monthIdx = showAdminConfirmDialogForMonth!!
+        val isPaid = (currentMember?.paidMonths ?: emptyList()).contains(monthIdx)
         AdminConfirmMonthPaymentDialog(
             monthIndex = monthIdx,
             monthName = ContributionHelper.getMonthName(monthIdx),
+            isCurrentlyPaid = isPaid,
             member = currentMember,
             onDismiss = { showAdminConfirmDialogForMonth = null },
-            onConfirmPayment = {
+            onTogglePayment = {
                 onRecordContribution(monthIdx)
                 showAdminConfirmDialogForMonth = null
             }
@@ -929,8 +956,9 @@ fun CaseItemCard(
     }
 
     Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+        border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -1206,8 +1234,9 @@ fun MemberItemCard(
     onRecordPayment: () -> Unit = {}
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+        border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -1503,8 +1532,10 @@ fun ReportsAnalyticsScreen(
         // Category distribution
         item {
             Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.5f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -1631,8 +1662,9 @@ fun MetricCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+        border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.5f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
     ) {
@@ -1698,7 +1730,7 @@ fun AdminAccessRestrictedDialog(
                         }
                     },
                     label = { Text("Secret Admin PIN") },
-                    placeholder = { Text("Default: 9922") },
+                    placeholder = { Text("Enter 4-digit PIN") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -1706,7 +1738,7 @@ fun AdminAccessRestrictedDialog(
                     supportingText = {
                         errorMessage?.let { msg ->
                             Text(msg, color = MaterialTheme.colorScheme.error)
-                        } ?: Text("Default PIN is 9922 (can be customized in About & Rules)", fontSize = 11.sp)
+                        } ?: Text("Welfare administration access only. PIN is confidential.", fontSize = 11.sp)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1721,7 +1753,7 @@ fun AdminAccessRestrictedDialog(
                         viewModel.setAdminSession(true)
                         onUnlockAdmin()
                     } else {
-                        errorMessage = "Incorrect Admin PIN. Try 9922 or your custom PIN."
+                        errorMessage = "Incorrect Admin PIN. Access denied."
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = WelfareBlue),
@@ -1739,17 +1771,14 @@ fun AdminAccessRestrictedDialog(
 }
 
 @Composable
-fun MpesaPaymentDialog(
+fun MemberMonthContributionInfoDialog(
     monthIndex: Int,
     monthName: String,
+    isPaid: Boolean,
     member: Member?,
-    onDismiss: () -> Unit,
-    onConfirmMpesaPayment: () -> Unit
+    onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    var transactionCode by remember { mutableStateOf("") }
-    var codeError by remember { mutableStateOf<String?>(null) }
-
     val accountNo = "SIFA-${member?.idNumber?.ifBlank { member.memberNumber } ?: "001"}"
     val amountDueKsh = member?.contributionRateKsh ?: 100
 
@@ -1758,14 +1787,14 @@ fun MpesaPaymentDialog(
         icon = {
             Surface(
                 shape = CircleShape,
-                color = Color(0xFF0077C2).copy(alpha = 0.12f),
+                color = if (isPaid) Color(0xFFE8F5E9) else Color(0xFFE1F5FE),
                 modifier = Modifier.size(54.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Default.Payments,
-                        contentDescription = "M-Pesa Payment",
-                        tint = Color(0xFF0077C2),
+                        imageVector = if (isPaid) Icons.Default.CheckCircle else Icons.Default.Payments,
+                        contentDescription = null,
+                        tint = if (isPaid) Color(0xFF2E7D32) else Color(0xFF0077C2),
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -1773,134 +1802,143 @@ fun MpesaPaymentDialog(
         },
         title = {
             Text(
-                text = "Pay Contribution: $monthName 2026",
+                text = "Contribution: $monthName 2026",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
         },
         text = {
             Column {
-                Text(
-                    text = "Monthly welfare contribution is Ksh $amountDueKsh per member. Use your SIM Toolkit or M-Pesa to complete the contribution:",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // M-Pesa Paybill instructions Card
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE1F5FE)),
-                    border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.6f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                if (isPaid) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFE8F5E9),
+                        border = BorderStroke(1.dp, Color(0xFFA5D6A7)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Service:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
-                            Text("M-PESA Paybill", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Business No:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
-                            Text("400200", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.labelMedium)
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Account No:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
-                            Text(accountNo, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Amount:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
-                            Text("Ksh $amountDueKsh", fontWeight = FontWeight.ExtraBold, color = Color(0xFF0077C2), style = MaterialTheme.typography.labelMedium)
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("Payment Verified & Active", fontWeight = FontWeight.Bold, color = Color(0xFF1B5E20), fontSize = 13.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("Ksh $amountDueKsh for $monthName has been officially recorded by the Welfare Administrator.", fontSize = 12.sp, color = Color(0xFF2E7D32))
+                            }
                         }
                     }
-                }
+                } else {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFFFF3E0),
+                        border = BorderStroke(1.dp, Color(0xFFFFCC80)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("Awaiting Payment / Verification", fontWeight = FontWeight.Bold, color = Color(0xFFBF360C), fontSize = 13.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("Pay Ksh $amountDueKsh via M-Pesa. Status will be marked paid upon Admin verification.", fontSize = 12.sp, color = Color(0xFFE65100))
+                            }
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                // SIM Toolkit launcher button
-                OutlinedButton(
-                    onClick = {
-                        try {
-                            // Try launching SIM Toolkit package
-                            val stkIntent = context.packageManager.getLaunchIntentForPackage("com.android.stk")
-                            if (stkIntent != null) {
-                                context.startActivity(stkIntent)
-                            } else {
-                                // Fallback to Safaricom M-Pesa USSD dialer *334#
+                    // M-Pesa Paybill instructions Card
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F8FE)),
+                        border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.6f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Service:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
+                                Text("M-PESA Paybill", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Business No:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
+                                Text("400200", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.labelMedium)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Account No:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
+                                Text(accountNo, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Amount:", style = MaterialTheme.typography.labelMedium, color = Color(0xFF01579B))
+                                Text("Ksh $amountDueKsh", fontWeight = FontWeight.ExtraBold, color = Color(0xFF0077C2), style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // SIM Toolkit launcher button
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                val stkIntent = context.packageManager.getLaunchIntentForPackage("com.android.stk")
+                                if (stkIntent != null) {
+                                    context.startActivity(stkIntent)
+                                } else {
+                                    val ussdIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:*334%23"))
+                                    context.startActivity(ussdIntent)
+                                }
+                            } catch (e: Exception) {
                                 val ussdIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:*334%23"))
                                 context.startActivity(ussdIntent)
                             }
-                        } catch (e: Exception) {
-                            val ussdIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:*334%23"))
-                            context.startActivity(ussdIntent)
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("open_sim_toolkit_button")
-                ) {
-                    Icon(Icons.Default.SimCard, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Open SIM Toolkit / Dial *334#", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("open_sim_toolkit_button")
+                    ) {
+                        Icon(Icons.Default.SimCard, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Open SIM Toolkit / Dial *334#", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "🔒 Security Note: For welfare fund accountability, monthly payment records are verified and marked as paid exclusively by the Welfare Administrator upon receiving the transaction confirmation.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        fontSize = 11.sp
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedTextField(
-                    value = transactionCode,
-                    onValueChange = {
-                        transactionCode = it.uppercase()
-                        codeError = null
-                    },
-                    label = { Text("M-Pesa SMS Confirmation Code") },
-                    placeholder = { Text("e.g. SI84PQ92K1") },
-                    singleLine = true,
-                    isError = codeError != null,
-                    supportingText = {
-                        codeError?.let {
-                            Text(it, color = MaterialTheme.colorScheme.error)
-                        } ?: Text("Enter code received via SMS to confirm payment", fontSize = 11.sp)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("mpesa_code_input")
-                )
             }
         },
         confirmButton = {
             Button(
-                onClick = {
-                    if (transactionCode.trim().length >= 4) {
-                        onConfirmMpesaPayment()
-                    } else {
-                        codeError = "Please enter the M-Pesa confirmation code"
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0077C2)),
-                modifier = Modifier.testTag("confirm_mpesa_payment_button")
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = WelfareBlue)
             ) {
-                Text("Confirm Payment", fontWeight = FontWeight.Bold)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Close", fontWeight = FontWeight.Bold)
             }
         }
     )
@@ -1910,9 +1948,10 @@ fun MpesaPaymentDialog(
 fun AdminConfirmMonthPaymentDialog(
     monthIndex: Int,
     monthName: String,
+    isCurrentlyPaid: Boolean,
     member: Member?,
     onDismiss: () -> Unit,
-    onConfirmPayment: () -> Unit
+    onTogglePayment: () -> Unit
 ) {
     val rate = member?.contributionRateKsh ?: 100
     val memberTitle = member?.fullName ?: "Member"
@@ -1945,31 +1984,49 @@ fun AdminConfirmMonthPaymentDialog(
         text = {
             Column {
                 Text(
-                    text = "As Welfare Admin, you can verify and record the monthly contribution for this member upon receiving M-Pesa or bank receipt.",
+                    text = "As Welfare Admin, you have exclusive authorization to edit and verify monthly contributions for community members upon checking bank or M-Pesa receipts.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Card(
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F8FE)),
+                    border = BorderStroke(1.dp, Color(0xFF81D4FA).copy(alpha = 0.5f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(14.dp)) {
                         Text("Member: $memberTitle", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text("Month: $monthName 2026", fontSize = 12.sp)
-                        Text("Amount: Ksh $rate", fontWeight = FontWeight.Bold, color = WelfareBlue, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Rate: Ksh $rate", fontWeight = FontWeight.Bold, color = WelfareBlue, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Current Status: ", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
+                            Text(
+                                text = if (isCurrentlyPaid) "PAID ✅" else "UNPAID ⏳",
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (isCurrentlyPaid) Color(0xFF2E7D32) else Color(0xFFD97706),
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
         },
         confirmButton = {
             Button(
-                onClick = onConfirmPayment,
-                colors = ButtonDefaults.buttonColors(containerColor = WelfareTeal),
+                onClick = onTogglePayment,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isCurrentlyPaid) Color(0xFFEF4444) else WelfareTeal
+                ),
                 modifier = Modifier.testTag("admin_confirm_month_button")
             ) {
-                Text("Record Ksh $rate Paid", fontWeight = FontWeight.Bold)
+                Text(
+                    text = if (isCurrentlyPaid) "Mark as Unpaid (Revert)" else "Confirm Ksh $rate Paid",
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
         dismissButton = {

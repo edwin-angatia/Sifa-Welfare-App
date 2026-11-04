@@ -164,6 +164,25 @@ class WelfareRepository(
         return result
     }
 
+    fun toggleMonthlyContribution(memberId: String, month: Int): Result<Member> {
+        val result = store.toggleMonthlyContribution(memberId, month)
+        if (result.isSuccess) {
+            val updated = result.getOrThrow()
+            if (_activeMemberFlow.value?.id == memberId) {
+                _activeMemberFlow.value = updated
+            }
+            _membersFlow.value = store.getAllMembers()
+            if (auth.currentUser != null) {
+                try {
+                    db.collection("members").document(updated.id).set(updated.toUpdateMap())
+                } catch (e: Exception) {
+                    handleFirestoreError(e, OperationType.WRITE, "members")
+                }
+            }
+        }
+        return result
+    }
+
     fun observeMember(userId: String): Flow<Member?> = activeMemberFlow
 
     fun observeAllMembers(): Flow<List<Member>> = _membersFlow.asStateFlow()
